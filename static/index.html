@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Chat Moderno</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+  
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #f4f6f9;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+    }
+  
+    h1 {
+      margin-top: 30px;
+      color: #333;
+    }
+  
+    #chat-container {
+      width: 100%;
+      max-width: 600px;
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+      display: flex;
+      flex-direction: column;
+      height: 80vh;
+      margin-top: 20px;
+      padding: 20px;
+    }
+  
+    #chat {
+      flex-grow: 1;
+      overflow-y: auto;
+      padding-right: 10px;
+      margin-bottom: 15px;
+    }
+  
+    .msg {
+      margin: 10px 0;
+      padding: 10px 15px;
+      border-radius: 8px;
+      width: 100%;
+      display: flex;
+    }
+  
+    .user {
+      background-color: #d0ebff;
+      align-self: flex-end;
+    }
+  
+    .bot {
+      background-color: #e6f4ea;
+      align-self: flex-start;
+    }
+  
+    form {
+      display: flex;
+      gap: 10px;
+    }
+  
+    input[type="text"] {
+      flex-grow: 1;
+      padding: 10px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      font-size: 16px;
+    }
+  
+    button {
+      background-color: #4CAF50;
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+  
+    button:hover {
+      background-color: #45a049;
+    }
+  
+    .bot span.typing::after {
+      content: '';
+      display: inline-block;
+      width: 1em;
+      animation: dots 1.2s steps(3, end) infinite;
+      vertical-align: bottom;
+    }
+
+    @keyframes dots {
+      0% { content: ''; }
+      33% { content: '.'; }
+      66% { content: '..'; }
+      100% { content: '...'; }
+    }
+
+    @media (max-width: 600px) {
+      #chat-container {
+        margin: 10px;
+        height: 90vh;
+      }
+    }
+  </style>
+  </head>
+  <script>
+    // Genera un UUID simple (no 100% RFC pero suficiente para sesiones locales)
+    function generateId() {
+      return 'xxxxxxxxyxxx'.replace(/[xy]/g, c => {
+        const r = Math.random() * 16 | 0;
+        return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16);
+      });
+    }
+    const chatId = generateId();
+  </script>  
+<body>
+  <h1>Agente especializdo en condiciones de ríos</h1>
+  <div id="chat-container">
+    <div id="chat"></div>
+    <form id="chat-form">
+      <input type="text" id="message" autocomplete="off" placeholder="Escribe un mensaje..." required>
+      <button type="submit">Enviar</button>
+    </form>
+  </div>
+
+  <script>
+    const form = document.getElementById('chat-form');
+    const input = document.getElementById('message');
+    const chat = document.getElementById('chat');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const text = input.value;
+      appendMessage('user', text);
+      input.value = '';
+
+      // Show a "typing..." placeholder and keep its reference
+      const placeholderId = appendMessage('bot', 'Escribiendo...');
+
+      try {
+        const res = await fetch('/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ 
+            message: text,
+            chat_id: chatId
+          })
+        });
+        const data = await res.json();
+        updateMessage(placeholderId, data.reply);
+      } catch (err) {
+        updateMessage(placeholderId, '❌ Error al conectar con el servidor');
+      }
+    });
+
+    function appendMessage(sender, text) {
+      const div = document.createElement('div');
+      div.className = 'msg ' + sender;
+      const span = document.createElement('span');
+      span.textContent = text;
+      span.classList.add('typing');
+      div.appendChild(span);
+      chat.appendChild(div);
+      chat.scrollTop = chat.scrollHeight;
+
+      // Return a reference to update later
+      const id = Date.now() + Math.random();
+      div.dataset.msgId = id;
+      return id;
+    }
+
+    function updateMessage(id, newText) {
+      const el = [...chat.children].find(
+        msg => msg.dataset.msgId === id.toString()
+      );
+      if (el) {
+        const span = el.querySelector('span');
+        span.textContent = newText;
+        span.classList.remove('typing'); // 👈 Remove animation class
+      }
+    }
+
+  </script>
+</body>
+</html>
