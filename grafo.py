@@ -75,7 +75,8 @@ class AgenteCondicionesRios:
                 SystemMessage(content=f"""
                     Sólo debes responder a preguntas relativas a alguno de los siguientes cuatro ríos de interés: Gállego, Ésera, Ebro-alto y Ebro-bajo.
                     Los criterios que has de seguir para determinar si las condiciones son adecuadas para cada uno de los ríos de interés están configurados
-                        en el siguiente JSON: {json.dumps(criterio_recomendacion_rios)}
+                        en el siguiente JSON: {json.dumps(criterio_recomendacion_rios)}. Debes ser estricto al validar que las previsiones están dentro de 
+                        los rangos allí definidos
                 """),
                 HumanMessage(content=message)
             ]},
