@@ -1,5 +1,11 @@
+import json
 import os
+from langchain_core.messages import ToolMessage
 from langchain_core.tools import tool
+from langchain_core.tools.base import InjectedToolCallId
+from langgraph.prebuilt import InjectedState
+from langgraph.types import Command
+from typing_extensions import Annotated
 
 datos_tramos_rio = {
     "Gállego": {
@@ -64,14 +70,33 @@ def test_obten_informacion_saih():
   assert prediccion_ret == expected_con_datos_ret, f"Error al obtener las predicciones de Zaragoza, el resultado debería ser {expected_con_datos_ret} y ha sido {prediccion_ret}"
 
 @tool
-def obten_informacion_saih_tool(codigo_estacion: str) -> dict:
+def obten_informacion_saih_tool(
+    tool_call_id: Annotated[str, InjectedToolCallId], 
+    state: Annotated[dict, InjectedState]) -> dict:
     """
     It retrieves the information about the flow of a river, maing a request to the SAIH data service
     
-    It can retrieve both real time data, as well as the predicted flow in the following days. 
-    If the station code doesn't exist, it will return 'ERROR_DATOS'. If there is an error with the SAIH data service, it will return 'ERROR_API'.
+    It retrieves the predicted flow in the following days.
+    If there is an error with the SAIH data service, it will return 'ERROR_API'.
 
-    :param str codigo_estacion: Code of the station to query
     :return str: The predicted flow information
     """
-    return obten_informacion_saih(codigo_estacion)
+    if state.get("saih_predictions") is None:
+        print(f"No hay ninguna predicción cacheada en el estado. Uso el API de SAIH")
+        all_info = obten_informacion_saih()
+    else:
+        all_info = state["saih_predictions"]
+        print(f"Encontrada la predicción de SAIH en el estado. NO Uso el API de SAIH")
+
+    prediccion = json.dumps(all_info, sort_keys=True)
+
+    if all_info == 'ERROR_DATOS' or all_info == 'ERROR_API':
+        return all_info
+    
+    return Command(
+        update = {
+            "aemet_predictions": { state.get("saih_predictions")},
+            "saih_predictions": { state.get("saih_predictions")}, 
+            "messages": [ToolMessage(prediccion, tool_call_id=tool_call_id)],
+        }
+    )

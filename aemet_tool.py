@@ -148,11 +148,11 @@ def obten_predicciones_aemet_integradas_con_estado_tool(
     :return str: The weather prediction for the given location for that day and that hour
 
     """
-    if state.get("my_predictions") is None:
+    if state.get("aemet_predictions") is None:
         print(f"No hay ninguna predicción cacheada en el estado. Uso el API de AEMET")
         all_info = obten_predicciones_aemet(localidad, day_index)
     else:
-        all_info = state["my_predictions"].get(localidad)
+        all_info = state["aemet_predictions"].get(localidad)
         if all_info is None:
             print(f"Hay alguna predicción cacheada en el estado, pero no la de {localidad}. Uso el API de AEMET")
             all_info = obten_predicciones_aemet(localidad, day_index)
@@ -166,7 +166,8 @@ def obten_predicciones_aemet_integradas_con_estado_tool(
     prediccion = f"{temperatura} {precipitaciones}"    
     return Command(
         update = {
-            "my_predictions": { localidad: all_info },
-            "messages": [ToolMessage(prediccion, tool_call_id=tool_call_id)]
+            "aemet_predictions": { localidad: all_info },
+            "saih_predictions": { state.get("saih_predictions")}, 
+            "messages": [ToolMessage(prediccion, tool_call_id=tool_call_id)],
         }
     )

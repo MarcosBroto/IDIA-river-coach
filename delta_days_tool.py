@@ -17,11 +17,11 @@ def test_delta_days():
 @tool
 def delta_days_tool(input: datetime) -> int:
     """
-    It checks if the given date is in the range of suitable dates. This is calculated in this tool, which must return a value between 0 and 6.
-    If the returned value is not in that range, the agent won't be able to provide the weather prediction.
+    It checks if the given date is in the range of suitable dates. This is calculated in this tool, which must return a value between 0 and 3.
+    If the returned value is not in that range, the agent won't be able to provide the weather and river flow prediction.
 
     :param datetime hoy: The current date.
     :param datetime input: The date to check.
-    :return: The timedelta in days between the input date and today, which should be a value between 0 and 6. If the value is not in this range, the agent won't be able to provide the weather prediction.
+    :return: The timedelta in days between the input date and today, which should be a value between 0 and 3. If the value is not in this range, the agent won't be able to provide the weather and river flow prediction.
     """
     return delta_days(date.today(), input)

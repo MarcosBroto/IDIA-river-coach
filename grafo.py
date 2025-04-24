@@ -1,5 +1,6 @@
 from aemet_tool import obten_predicciones_aemet_integradas_con_estado_tool
 from delta_days_tool import delta_days_tool
+from google.cloud import secretmanager
 from langchain.chat_models import init_chat_model
 from langgraph.checkpoint.memory import MemorySaver
 from langchain_core.messages import HumanMessage
@@ -7,19 +8,26 @@ from langgraph.graph import START, MessagesState, StateGraph, START, END
 from langgraph.prebuilt import ToolNode
 import os
 from saih_tool import obten_informacion_saih_tool
+import sys
 
 class MeteoGraphState(MessagesState):
-    my_predictions: dict = None
-
+    aemet_predictions: dict = None
+    saih_predictions: dict = None
 
 class AgenteCondicionesRios:
     def __init__(self):
         self.grafo_interno = self.genera_grafo()
 
     def genera_grafo(self):
-        with open('./openai_api_key', 'r') as f:
-            os.environ['OPENAI_API_KEY'] = f.read().strip()
-            f.close()
+
+        if sys.platform.startswith("linux"):
+            with open('./openai_api_key', 'r') as f:
+                os.environ['OPENAI_API_KEY'] = f.read().strip()
+                f.close()
+        else:
+            client = secretmanager.SecretManagerServiceClient()
+            response = client.access_secret_version(name="projects/725612052062/secrets/openai_key/versions/1")
+            os.environ['OPENAI_API_KEY'] = response.payload.data.decode("UTF-8")
 
         tools = [delta_days_tool, obten_predicciones_aemet_integradas_con_estado_tool, obten_informacion_saih_tool]
         model_with_tools = init_chat_model("gpt-4o-mini",
