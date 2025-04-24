@@ -20,8 +20,7 @@ class AgenteCondicionesRios:
         self.grafo_interno = self.genera_grafo()
 
     def genera_grafo(self):
-
-        if sys.platform.startswith("linux"):
+        if os.environ['EXECUTION_ENVIRONMENT'] != None:
             with open('./openai_api_key', 'r') as f:
                 os.environ['OPENAI_API_KEY'] = f.read().strip()
                 f.close()
