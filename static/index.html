@@ -122,6 +122,9 @@
     }
     const chatId = generateId();
   </script>  
+
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
 <body>
   <h1>Agente especializdo en condiciones de ríos</h1>
   <div id="chat-container">
@@ -184,7 +187,7 @@
       );
       if (el) {
         const span = el.querySelector('span');
-        span.textContent = newText;
+        span.innerHTML = marked.parse(newText);
         span.classList.remove('typing'); // 👈 Remove animation class
       }
     }
