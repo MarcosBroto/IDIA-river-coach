@@ -1,9 +1,10 @@
 from aemet_tool import obten_predicciones_aemet_integradas_con_estado_tool
+from datetime import datetime
 from delta_days_tool import delta_days_tool
 from google.cloud import secretmanager
 from langchain.chat_models import init_chat_model
 from langgraph.checkpoint.memory import MemorySaver
-from langchain_core.messages import HumanMessage
+from langchain_core.messages import HumanMessage, SystemMessage
 from langgraph.graph import START, MessagesState, StateGraph, START, END
 from langgraph.prebuilt import ToolNode
 import os
@@ -26,7 +27,7 @@ class AgenteCondicionesRios:
                 f.close()
         else:
             client = secretmanager.SecretManagerServiceClient()
-            response = client.access_secret_version(name="projects/725612052062/secrets/openai_key/versions/1")
+            response = client.access_secret_version(name="projects/299185326090/secrets/openai_key/versions/1")
             os.environ['OPENAI_API_KEY'] = response.payload.data.decode("UTF-8")
 
         tools = [delta_days_tool, obten_predicciones_aemet_integradas_con_estado_tool, obten_informacion_saih_tool]
@@ -61,8 +62,12 @@ class AgenteCondicionesRios:
         return app
 
     def pregunta(self, chat_id: str, message: str):
+        now = datetime.now()
         messages = self.grafo_interno.invoke(
-            {"messages": [HumanMessage(content=message)]},
+            {"messages": [
+                # SystemMessage(content=f"Considera que la día y hora actuales son {now} "),
+                HumanMessage(content=message)
+            ]},
             config={"configurable": {"thread_id": chat_id}}
         )
         return(messages['messages'][-1].content)
