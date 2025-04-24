@@ -29,6 +29,7 @@ class AgenteCondicionesRios:
             client = secretmanager.SecretManagerServiceClient()
             response = client.access_secret_version(name="projects/299185326090/secrets/openai_key/versions/1")
             os.environ['OPENAI_API_KEY'] = response.payload.data.decode("UTF-8")
+            print(f'La clave que leo es {response.payload.data.decode("UTF-8")}')
 
         tools = [delta_days_tool, obten_predicciones_aemet_integradas_con_estado_tool, obten_informacion_saih_tool]
         model_with_tools = init_chat_model("gpt-4o-mini",
@@ -65,7 +66,7 @@ class AgenteCondicionesRios:
         now = datetime.now()
         messages = self.grafo_interno.invoke(
             {"messages": [
-                # SystemMessage(content=f"Considera que la día y hora actuales son {now} "),
+                SystemMessage(content=f"Considera que el día y hora actuales son {now} "),
                 HumanMessage(content=message)
             ]},
             config={"configurable": {"thread_id": chat_id}}

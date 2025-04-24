@@ -18,6 +18,7 @@ def test_delta_days():
 def delta_days_tool(input: datetime) -> int:
     """
     It checks if the given date is in the range of suitable dates. This is calculated in this tool, which must return a value between 0 and 3.
+    You should not rely on your understanding of current date to make your own calculation of delta days. Please ALWAYS USE THIS TOOL
     If the returned value is not in that range, the agent won't be able to provide the weather and river flow prediction.
 
     :param datetime hoy: The current date.
