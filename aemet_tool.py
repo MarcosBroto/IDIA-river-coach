@@ -154,7 +154,6 @@ def obten_predicciones_aemet_integradas_con_estado_tool(
         all_info = obten_predicciones_aemet(localidad, day_index)
         state["aemet_predictions"] = {}
         state["aemet_predictions"][my_dict_key] = all_info
-        print(state["aemet_predictions"])
     else:
         all_info = state["aemet_predictions"].get(my_dict_key)
         if all_info is None:
@@ -169,17 +168,9 @@ def obten_predicciones_aemet_integradas_con_estado_tool(
     temperatura = temperatura_por_hora(all_info, hora)
     precipitaciones = precipitaciones_por_hora(all_info, hora)
     prediccion = f"{temperatura} {precipitaciones}"
-    if state.get("saih_predictions") == None:
-        return Command(
-            update = {
-                "aemet_predictions": state["aemet_predictions"],
-                "messages": [ToolMessage(prediccion, tool_call_id=tool_call_id)],
-            }
-    )
     return Command(
         update = {
             "aemet_predictions": state["aemet_predictions"],
-            "saih_predictions": state["saih_predictions"],
             "messages": [ToolMessage(prediccion, tool_call_id=tool_call_id)],
         }
     )
