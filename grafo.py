@@ -9,7 +9,6 @@ from langgraph.graph import START, MessagesState, StateGraph, START, END
 from langgraph.prebuilt import ToolNode
 import os
 from saih_tool import obten_informacion_saih_tool
-import sys
 
 class MeteoGraphState(MessagesState):
     aemet_predictions: dict = None
@@ -20,7 +19,7 @@ class AgenteCondicionesRios:
         self.grafo_interno = self.genera_grafo()
 
     def genera_grafo(self):
-        if os.environ['EXECUTION_ENVIRONMENT'] != None:
+        if os.environ.get('EXECUTION_ENVIRONMNT') != None:
             with open('./openai_api_key', 'r') as f:
                 os.environ['OPENAI_API_KEY'] = f.read().strip()
                 f.close()
