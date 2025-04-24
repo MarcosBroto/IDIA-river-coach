@@ -95,8 +95,8 @@ def obten_informacion_saih_tool(
     
     return Command(
         update = {
-            "aemet_predictions": { state.get("saih_predictions")},
-            "saih_predictions": { state.get("saih_predictions")}, 
+            "aemet_predictions": { state.get("aemet_predictions")},
+            "saih_predictions": all_info, 
             "messages": [ToolMessage(prediccion, tool_call_id=tool_call_id)],
         }
     )
