@@ -148,26 +148,38 @@ def obten_predicciones_aemet_integradas_con_estado_tool(
     :return str: The weather prediction for the given location for that day and that hour
 
     """
+    my_dict_key = f"{localidad}-{day_index}"
     if state.get("aemet_predictions") is None:
         print(f"No hay ninguna predicción cacheada en el estado. Uso el API de AEMET")
         all_info = obten_predicciones_aemet(localidad, day_index)
+        state["aemet_predictions"] = {}
+        state["aemet_predictions"][my_dict_key] = all_info
+        print(state["aemet_predictions"])
     else:
-        all_info = state["aemet_predictions"].get(localidad)
+        all_info = state["aemet_predictions"].get(my_dict_key)
         if all_info is None:
-            print(f"Hay alguna predicción cacheada en el estado, pero no la de {localidad}. Uso el API de AEMET")
+            print(f"Hay alguna predicción cacheada en el estado, pero no la de {my_dict_key}. Uso el API de AEMET")
             all_info = obten_predicciones_aemet(localidad, day_index)
-        print(f"Encontrada la predicción de {localidad} en el estado. NO Uso el API de AEMET")
+            state["aemet_predictions"][my_dict_key] = all_info
+        print(f"Encontrada la predicción de {my_dict_key} en el estado. NO Uso el API de AEMET")
 
     if all_info == 'ERROR_DATOS' or all_info == 'ERROR_API':
         return all_info
     
     temperatura = temperatura_por_hora(all_info, hora)
     precipitaciones = precipitaciones_por_hora(all_info, hora)
-    prediccion = f"{temperatura} {precipitaciones}"    
+    prediccion = f"{temperatura} {precipitaciones}"
+    if state.get("saih_predictions") == None:
+        return Command(
+            update = {
+                "aemet_predictions": state["aemet_predictions"],
+                "messages": [ToolMessage(prediccion, tool_call_id=tool_call_id)],
+            }
+    )
     return Command(
         update = {
-            "aemet_predictions": { localidad: all_info },
-            "saih_predictions": { state.get("saih_predictions")}, 
+            "aemet_predictions": state["aemet_predictions"],
+            "saih_predictions": state["saih_predictions"],
             "messages": [ToolMessage(prediccion, tool_call_id=tool_call_id)],
         }
     )

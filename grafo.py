@@ -4,7 +4,7 @@ from delta_days_tool import delta_days_tool
 from google.cloud import secretmanager
 from langchain.chat_models import init_chat_model
 from langgraph.checkpoint.memory import MemorySaver
-from langchain_core.messages import HumanMessage, SystemMessage
+from langchain_core.messages import HumanMessage, SystemMessage, ToolMessage
 from langgraph.graph import START, MessagesState, StateGraph, START, END
 from langgraph.prebuilt import ToolNode
 import os
@@ -62,6 +62,28 @@ class AgenteCondicionesRios:
 
     def pregunta(self, chat_id: str, message: str):
         now = datetime.now()
+
+        # all_chunks = self.grafo_interno.stream(
+        #     {"messages": [
+        #         SystemMessage(content=f"Considera que el día y hora actuales son {now} "),
+        #         HumanMessage(content=message)
+        #     ]},
+        #     config={"configurable": {"thread_id": "chat_id"}},
+        #     stream_mode="values"
+        # )
+        # for chunk in all_chunks:
+        #     all_messages = chunk["messages"]
+        #     if isinstance(all_messages[-1], ToolMessage):
+        #         for m_index in range(len(all_messages) -1, -1, -1):
+        #             if isinstance(all_messages[m_index], ToolMessage):
+        #                 all_messages[m_index].pretty_print()
+        #             else:
+        #                 break
+        #     else:
+        #         all_messages[-1].pretty_print()
+                
+        # return all_messages[-1].content
+
         messages = self.grafo_interno.invoke(
             {"messages": [
                 SystemMessage(content=f"Considera que el día y hora actuales son {now} "),
