@@ -8,3 +8,5 @@ annotated-types
 requests
 typing-inspection
 typing-extensions
+google-cloud-core
+google-cloud-secret-manager
